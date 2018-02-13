@@ -3,13 +3,16 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import sun.invoke.empty.Empty;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class MainTest {
+public class MainTest
+{
 
     public MainWindowDelfi PageDelfi = new MainWindowDelfi();
     public MobileVersionDelfi MobDelfi = new MobileVersionDelfi();
@@ -27,7 +30,7 @@ public class MainTest {
         driver.close();
     }
     @Test
-    public void CheckNews()
+    public void CheckNewsMainPage()
     {
         Logger log = Logger.getLogger(MainTest.class.getName());
         System.setProperty("webdriver.gecko.driver", "C:/geckodriver.exe");
@@ -48,30 +51,66 @@ public class MainTest {
         List<WebElement> headersNewsMob = driverMob.findElements(MobDelfi.newElement);
         Assert.assertNotNull("Not find headers", headersNewsMob);
 
+        List<NewDelfi> DelfiWeb = new ArrayList<NewDelfi>();
+        List<NewDelfi> DelfiMob = new ArrayList<NewDelfi>();
+        String webTitle = "";
+        String mobTitle= "";
+        String webHrefNew ="";
+        String mobHrefNew ="";
+        String webHrefComments = "";
+        String mobHrefComment = "";
+        String webCount= "";
+        String mobCount= "";
+        for(int i=0; i<5;i++)
+        {            
+            try
+            {
+                webTitle = headersNewsWeb.get(i).findElement(PageDelfi.titleOfNew).getText();
+                mobTitle = headersNewsMob.get(i).findElement(MobDelfi.titleOfNew).getText();
+                webHrefNew =headersNewsWeb.get(i).findElement(PageDelfi.titleOfNew).getAttribute("href");
+                mobHrefNew =headersNewsMob.get(i).findElement(MobDelfi.titleOfNew).getAttribute("href");
+                webCount = headersNewsWeb.get(i).findElement(PageDelfi.countOfComments).getText();
+                mobCount = headersNewsMob.get(i).findElement(MobDelfi.countOfComments).getText();
+                webHrefComments = headersNewsWeb.get(i).findElement(PageDelfi.countOfComments).getAttribute("href");
+                mobHrefComment = headersNewsMob.get(i).findElement(MobDelfi.countOfComments).getAttribute("href");
+            }
+            catch (Exception ex)
+            {
+                log.log(Level.WARNING, "Exception: ", ex);
+            }
+
+            NewDelfi MainPageWeb = new NewDelfi(webTitle, webCount,webHrefNew,webHrefComments);
+            NewDelfi MainPageMob = new NewDelfi(mobTitle,mobCount,mobHrefNew,mobHrefComment);
+            DelfiWeb.add(MainPageWeb);
+            DelfiMob.add(MainPageMob);
+            Assert.assertEquals(MainPageWeb.Title,MainPageMob.Title);
+            Assert.assertEquals(MainPageWeb.CountOfComments,MainPageMob.CountOfComments);
+        }
+
         for(int i=0; i<5;i++)
         {
+            driverWeb.get(DelfiWeb.get(i).HrefNew);
+            driverMob.get(DelfiMob.get(i).HrefNew);
             try
             {
-                String webTitle = headersNewsWeb.get(i).findElement(PageDelfi.titleOfNew).getText();
-                String mobTitle = headersNewsMob.get(i).findElement(MobDelfi.titleOfNew).getText();
-                Assert.assertEquals(webTitle,mobTitle);
+                String titleWeb = driverWeb.findElement(MainWindowDelfi.titleOfNewOpened).getText();
+                String titleMob = driverMob.findElement(MobileVersionDelfi.titleOfNewOpened).getText();
+                String commentWeb = driverWeb.findElement(MainWindowDelfi.commentsOfNewOpened).getText();
+                String commentMob = driverMob.findElement(MobileVersionDelfi.commentsOfNewOpened).getText();
+
+                Assert.assertEquals(DelfiWeb.get(i).Title,titleWeb);
+                Assert.assertEquals(titleWeb,titleMob);
+                Assert.assertEquals(commentMob,commentWeb);
             }
             catch (Exception ex)
             {
                 log.log(Level.WARNING, "Exception: ", ex);
             }
-            try
-            {
-                String webCount = headersNewsWeb.get(i).findElement(PageDelfi.countOfComments).getText();
-                String mobCount = headersNewsMob.get(i).findElement(MobDelfi.countOfComments).getText();
-                Assert.assertEquals(webCount,mobCount);
-            }
-            catch (Exception ex)
-            {
-                log.log(Level.WARNING, "Exception: ", ex);
-            }
+
         }
+        
         driverMob.close();
         driverWeb.close();
     }
+
 }
